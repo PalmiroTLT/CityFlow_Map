@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
-import mkcert from "vite-plugin-mkcert";
+// import mkcert from "vite-plugin-mkcert";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === "development" && componentTagger(),
-    mkcert(),
+    // mkcert(),
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
@@ -23,9 +23,9 @@ export default defineConfig(({ mode }) => ({
       srcDir: "public",
       filename: "sw.js",
       manifest: {
-        name: "Retro City Map",
-        short_name: "CityMap",
-        description: "Интерактивная карта города в стиле ретро игр",
+        name: "CityFlow_Map",
+        short_name: "CityFlow_Map",
+        description: "Интерактивная карта города и путеводители",
         theme_color: "#5B9FFF",
         background_color: "#1F2937",
         display: "standalone",
