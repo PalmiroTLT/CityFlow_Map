@@ -1,0 +1,284 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 5%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 5%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 5%;
+    --primary: 14 100% 61%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 14 100% 61%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 14 100% 61%;
+    --radius: 0.25rem;
+    --premium: 14 100% 61%;
+    --premium-foreground: 0 0% 100%;
+    --marker-museum: 14 100% 61%;
+    --marker-cafe: 38 100% 50%;
+    --marker-public: 200 100% 50%;
+    --marker-park: 150 80% 45%;
+    --marker-landmark: 280 80% 60%;
+    --marker-entertainment: 330 80% 55%;
+    --pixel-border: 2px;
+    --scanline: none;
+    --shadow-retro-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-retro-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --shadow-retro-lg: 0 8px 20px rgba(0, 0, 0, 0.2);
+    --shadow-retro-glow: 0 0 15px hsl(14 100% 61% / 0.3);
+    --gradient-primary: linear-gradient(135deg, hsl(14 100% 61%) 0%, hsl(14 100% 51%) 100%);
+    --gradient-primary-vibrant: linear-gradient(135deg, hsl(14 100% 61%) 0%, hsl(14 100% 51%) 50%, hsl(0 100% 61%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(14 100% 61%) 0%, hsl(0 84% 60%) 100%);
+    --gradient-premium: linear-gradient(135deg, hsl(14 100% 61%) 0%, hsl(14 100% 51%) 100%);
+    --gradient-premium-vibrant: linear-gradient(135deg, hsl(14 100% 61%) 0%, hsl(14 100% 51%) 50%, hsl(0 100% 61%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(14 100% 61%) 0%, hsl(14 100% 51%) 50%, hsl(0 100% 61%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 98%) 0%, hsl(0 0% 100%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(0 0% 10%) 0%, hsl(0 0% 15%) 100%);
+    --shadow-card: var(--shadow-retro-sm);
+    --shadow-card-hover: var(--shadow-retro-md);
+    --shadow-premium: var(--shadow-retro-md);
+    --shadow-premium-hover: var(--shadow-retro-lg), var(--shadow-retro-glow);
+    --shadow-marker: var(--shadow-retro-sm);
+    --shadow-glow: var(--shadow-retro-glow);
+    --shadow-glow-premium: 0 0 20px hsl(14 100% 61% / 0.4);
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .dark {
+    --background: 0 0% 8%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 14 100% 61%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 14 100% 61%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 14 100% 61%;
+    --premium: 14 100% 61%;
+    --premium-foreground: 0 0% 100%;
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 10%) 0%, hsl(0 0% 12%) 100%);
+  }
+
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    font-size: clamp(14px, 0.875rem + 0.25vw, 16px);
+    overflow-x: hidden;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Advent Pro', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    overflow-x: hidden;
+  }
+  
+  h1 {
+    font-size: clamp(1.875rem, 1.5rem + 2vw, 3rem);
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+  
+  h2 {
+    font-size: clamp(1.5rem, 1.25rem + 1.5vw, 2.25rem);
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  
+  h3 {
+    font-size: clamp(1.25rem, 1.1rem + 1vw, 1.875rem);
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  
+  h4 {
+    font-size: clamp(1.125rem, 1rem + 0.625vw, 1.5rem);
+    line-height: 1.3;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  button, input, select, textarea {
+    font-family: inherit;
+    font-weight: 600;
+    font-size: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);
+  }
+  
+  .retro-text-shadow {
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .retro-glow {
+    box-shadow: 0 0 20px hsl(14 100% 61% / 0.3);
+    animation: glow 3s ease-in-out infinite alternate;
+  }
+  
+  @keyframes glow {
+    from {
+      box-shadow: 0 0 20px hsl(14 100% 61% / 0.3);
+    }
+    to {
+      box-shadow: 0 0 30px hsl(14 100% 61% / 0.5);
+    }
+  }
+}
+
+.rich-text-editor .ql-container { @apply border-border rounded-b-md; min-height: 200px; }
+.rich-text-editor .ql-toolbar { @apply border-border rounded-t-md bg-muted/50; }
+.rich-text-editor .ql-editor { @apply text-foreground; min-height: 200px; }
+.rich-text-editor .ql-editor.ql-blank::before { @apply text-muted-foreground italic; }
+.rich-text-editor .ql-snow .ql-stroke { @apply stroke-foreground; }
+.rich-text-editor .ql-snow .ql-fill { @apply fill-foreground; }
+.rich-text-editor .ql-snow .ql-picker-label { @apply text-foreground; }
+.rich-text-editor .ql-snow .ql-picker-options { @apply bg-popover border-border; }
+.rich-text-editor .ql-snow .ql-picker-item:hover { @apply text-primary; }
+
+@layer components {
+  .pixel-border {
+    @apply border border-border;
+  }
+
+  .pixel-corners {
+    border-radius: 2px;
+  }
+
+  .scanlines {
+    @apply relative;
+  }
+
+  .retro-button {
+    @apply relative overflow-hidden px-8 py-4 font-bold uppercase tracking-wide transition-all duration-200;
+    @apply bg-primary text-primary-foreground rounded-sm;
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.15),
+      0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .retro-button:hover {
+    @apply bg-primary/90 scale-[1.02];
+    box-shadow: 
+      0 6px 16px rgba(0, 0, 0, 0.2),
+      0 3px 6px rgba(0, 0, 0, 0.15);
+  }
+
+  .retro-button:active {
+    @apply scale-[0.98];
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.15),
+      0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  .premium-glow {
+    animation: premium-pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes premium-pulse {
+    0%, 100% {
+      box-shadow: 0 4px 12px rgba(255, 92, 57, 0.2);
+    }
+    50% {
+      box-shadow: 0 8px 20px rgba(255, 92, 57, 0.4);
+    }
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out;
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.6s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .animate-blink {
+    animation: blink 1.5s step-end infinite;
+  }
+
+  .animate-pixel-float {
+    animation: pixel-float 2s ease-in-out infinite;
+  }
+
+  .animate-glitch {
+    animation: glitch 0.5s infinite;
+  }
+
+  /* Mobile-specific utilities */
+  .touch-action-none {
+    touch-action: none;
+  }
+
+  .touch-pan-y {
+    touch-action: pan-y;
+  }
+
+  .overflow-x-clip {
+    overflow-x: clip;
+  }
+
+  /* Safe area insets for mobile */
+  @supports (padding: max(0px)) {
+    .safe-area-inset-bottom {
+      padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+
+    .safe-area-inset-top {
+      padding-top: max(1rem, env(safe-area-inset-top));
+    }
+  }
+
+  /* Prevent text overflow */
+  .text-truncate-2 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .text-truncate-3 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+}

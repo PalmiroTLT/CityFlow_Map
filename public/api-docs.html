@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro City Map API Documentation</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.10.0/swagger-ui.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'VT323', monospace;
+        }
+        .topbar {
+            background: linear-gradient(135deg, hsl(220 100% 66%) 0%, hsl(280 100% 66%) 100%);
+            padding: 20px;
+            text-align: center;
+        }
+        .topbar-title {
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            text-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+            margin: 0;
+        }
+        .topbar-subtitle {
+            color: white;
+            font-size: 18px;
+            margin: 10px 0 0 0;
+        }
+        .swagger-ui .topbar {
+            display: none;
+        }
+        .info {
+            background: linear-gradient(135deg, hsl(220 13% 18%) 0%, hsl(220 13% 20%) 100%);
+            color: hsl(60 30% 96%);
+            padding: 20px;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <h1 class="topbar-title">🗺️ RETRO CITY MAP API</h1>
+        <p class="topbar-subtitle">Документация REST API в стиле ретро-геймдева</p>
+    </div>
+
+    <div id="swagger-ui"></div>
+
+    <script src="https://unpkg.com/swagger-ui-dist@5.10.0/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.10.0/swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.onload = function() {
+            const ui = SwaggerUIBundle({
+                url: "/docs/swagger.yaml",
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                defaultModelsExpandDepth: 1,
+                defaultModelExpandDepth: 3,
+                docExpansion: "list",
+                filter: true,
+                tryItOutEnabled: true
+            });
+
+            window.ui = ui;
+        };
+    </script>
+</body>
+</html>

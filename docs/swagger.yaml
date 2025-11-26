@@ -1,0 +1,457 @@
+openapi: 3.0.3
+info:
+  title: Retro City Map API
+  description: |
+    API для интерактивной карты города с местами, турами и премиум-контентом.
+    
+    ## Аутентификация
+    Все запросы требуют JWT токен в заголовке Authorization:
+    ```
+    Authorization: Bearer <your-jwt-token>
+    ```
+    
+    ## Базовый URL
+    ```
+    https://<project-id>.supabase.co/functions/v1
+    ```
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: https://pvckkprcgstyfxwyjrsv.supabase.co/functions/v1
+    description: Production server
+
+tags:
+  - name: Places
+    description: Управление местами на карте
+  - name: Tours
+    description: Управление турами
+  - name: Premium
+    description: Премиум функции
+  - name: Database
+    description: Прямой доступ к данным через REST API
+
+security:
+  - BearerAuth: []
+
+paths:
+  /add-place:
+    post:
+      tags:
+        - Places
+      summary: Добавить новое место
+      description: |
+        Добавляет новое место на карту. Доступно только для бизнес-пользователей.
+        
+        **Стоимость:** 100 кредитов
+        
+        **Требования:**
+        - Пользователь должен быть аутентифицирован
+        - Тип пользователя должен быть 'business'
+        - На балансе должно быть минимум 100 кредитов
+      operationId: addPlace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddPlaceRequest'
+            examples:
+              basic:
+                summary: Базовое место
+                value:
+                  name: "Кафе Ретро"
+                  description: "Уютное кафе в стиле 80-х"
+                  latitude: 44.8176
+                  longitude: 20.4633
+                  category_id: "550e8400-e29b-41d4-a716-446655440000"
+                  city_id: "660e8400-e29b-41d4-a716-446655440000"
+                  address: "ул. Князя Михаила 5"
+              premium:
+                summary: Место с дополнительными полями
+                value:
+                  name: "Музей видеоигр"
+                  description: "Коллекция ретро консолей"
+                  latitude: 44.8176
+                  longitude: 20.4633
+                  category_id: "550e8400-e29b-41d4-a716-446655440000"
+                  city_id: "660e8400-e29b-41d4-a716-446655440000"
+                  address: "Скадарска 29"
+                  google_maps_url: "https://maps.google.com/?q=44.8176,20.4633"
+                  image_url: "https://example.com/image.jpg"
+                  custom_button_text: "Забронировать"
+                  custom_button_url: "https://booking.example.com"
+      responses:
+        '200':
+          description: Место успешно добавлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddPlaceResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    placeId: "770e8400-e29b-41d4-a716-446655440000"
+                    remainingCredits: 400
+        '400':
+          description: Ошибка валидации данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                validation_error:
+                  value:
+                    error: "Missing required fields"
+        '401':
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    error: "Unauthorized"
+        '403':
+          description: Недостаточно прав или кредитов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                not_business:
+                  value:
+                    error: "Only business accounts can add places"
+                insufficient_credits:
+                  value:
+                    error: "Insufficient credits"
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /purchase-tour:
+    post:
+      tags:
+        - Tours
+      summary: Купить тур
+      description: |
+        Покупает тур за кредиты. После покупки тур становится доступным пользователю.
+        
+        **Стоимость:** Указана в поле `price` тура
+        
+        **Требования:**
+        - Пользователь должен быть аутентифицирован
+        - На балансе должно быть достаточно кредитов
+        - Тур не должен быть уже куплен
+      operationId: purchaseTour
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseTourRequest'
+            examples:
+              basic:
+                value:
+                  tourId: "880e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Тур успешно куплен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseTourResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    remainingCredits: 450
+        '400':
+          description: Ошибка запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                already_purchased:
+                  value:
+                    error: "Tour already purchased"
+                tour_not_found:
+                  value:
+                    error: "Tour not found"
+        '401':
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Недостаточно кредитов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                insufficient_credits:
+                  value:
+                    error: "Insufficient credits. Required: 500, Available: 450"
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /toggle-premium:
+    post:
+      tags:
+        - Premium
+      summary: Переключить премиум статус места
+      description: |
+        Активирует или деактивирует премиум статус места.
+        
+        **Стоимость:** 
+        - Активация: 500 кредитов
+        - Деактивация: бесплатно
+        
+        **Требования:**
+        - Пользователь должен быть владельцем места
+        - При активации на балансе должно быть минимум 500 кредитов
+      operationId: togglePremium
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TogglePremiumRequest'
+            examples:
+              activate:
+                summary: Активация премиума
+                value:
+                  placeId: "990e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Статус успешно изменён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TogglePremiumResponse'
+              examples:
+                activated:
+                  summary: Премиум активирован
+                  value:
+                    success: true
+                    isPremium: true
+                    remainingCredits: 0
+                deactivated:
+                  summary: Премиум деактивирован
+                  value:
+                    success: true
+                    isPremium: false
+                    remainingCredits: 500
+        '400':
+          description: Ошибка запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                place_not_found:
+                  value:
+                    error: "Place not found"
+        '401':
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Нет прав или недостаточно кредитов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                not_owner:
+                  value:
+                    error: "You are not the owner of this place"
+                insufficient_credits:
+                  value:
+                    error: "Insufficient credits. Required: 500, Available: 250"
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT токен из Supabase Auth
+
+  schemas:
+    AddPlaceRequest:
+      type: object
+      required:
+        - name
+        - latitude
+        - longitude
+        - category_id
+        - city_id
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Название места
+          example: "Кафе Ретро"
+        description:
+          type: string
+          maxLength: 1000
+          description: Описание места
+          example: "Уютное кафе в стиле 80-х"
+        latitude:
+          type: number
+          format: double
+          minimum: -90
+          maximum: 90
+          description: Широта
+          example: 44.8176
+        longitude:
+          type: number
+          format: double
+          minimum: -180
+          maximum: 180
+          description: Долгота
+          example: 20.4633
+        category_id:
+          type: string
+          format: uuid
+          description: ID категории места
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        city_id:
+          type: string
+          format: uuid
+          description: ID города
+          example: "660e8400-e29b-41d4-a716-446655440000"
+        address:
+          type: string
+          maxLength: 500
+          description: Адрес места
+          example: "ул. Князя Михаила 5"
+        google_maps_url:
+          type: string
+          format: uri
+          maxLength: 500
+          description: Ссылка на Google Maps
+          example: "https://maps.google.com/?q=44.8176,20.4633"
+        image_url:
+          type: string
+          format: uri
+          maxLength: 500
+          description: URL изображения места
+          example: "https://example.com/image.jpg"
+        custom_button_text:
+          type: string
+          maxLength: 100
+          description: Текст кастомной кнопки
+          example: "Забронировать"
+        custom_button_url:
+          type: string
+          format: uri
+          maxLength: 500
+          description: URL кастомной кнопки
+          example: "https://booking.example.com"
+
+    AddPlaceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        placeId:
+          type: string
+          format: uuid
+          description: ID созданного места
+          example: "770e8400-e29b-41d4-a716-446655440000"
+        remainingCredits:
+          type: integer
+          description: Остаток кредитов после операции
+          example: 400
+
+    PurchaseTourRequest:
+      type: object
+      required:
+        - tourId
+      properties:
+        tourId:
+          type: string
+          format: uuid
+          description: ID тура для покупки
+          example: "880e8400-e29b-41d4-a716-446655440000"
+
+    PurchaseTourResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        remainingCredits:
+          type: integer
+          description: Остаток кредитов после покупки
+          example: 450
+
+    TogglePremiumRequest:
+      type: object
+      required:
+        - placeId
+      properties:
+        placeId:
+          type: string
+          format: uuid
+          description: ID места для изменения статуса
+          example: "990e8400-e29b-41d4-a716-446655440000"
+
+    TogglePremiumResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        isPremium:
+          type: boolean
+          description: Новый премиум статус
+          example: true
+        remainingCredits:
+          type: integer
+          description: Остаток кредитов после операции
+          example: 0
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Описание ошибки
+          example: "Insufficient credits"
+
+  parameters:
+    Authorization:
+      name: Authorization
+      in: header
+      required: true
+      description: JWT токен в формате "Bearer {token}"
+      schema:
+        type: string
+        example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
