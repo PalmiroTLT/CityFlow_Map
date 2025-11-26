@@ -5,23 +5,23 @@ info:
     API для интерактивной карты города с местами, турами и премиум-контентом.
     
     ## Аутентификация
-    Все запросы требуют JWT токен в заголовке Authorization:
+    Большинство запросов требуют JWT токен в заголовке Authorization:
     ```
     Authorization: Bearer <your-jwt-token>
     ```
     
     ## Базовый URL
     ```
-    https://<project-id>.supabase.co/functions/v1
+    https://vjegrpjzhtyrihhpjpzz.supabase.co/functions/v1
     ```
-  version: 1.0.0
+  version: 2.0.0
   contact:
     name: API Support
-    email: support@example.com
+    email: support@retrocitymap.com
 
 servers:
-  - url: https://pvckkprcgstyfxwyjrsv.supabase.co/functions/v1
-    description: Production server
+  - url: https://vjegrpjzhtyrihhpjpzz.supabase.co/functions/v1
+    description: Production server (External Supabase)
 
 tags:
   - name: Places
@@ -29,9 +29,13 @@ tags:
   - name: Tours
     description: Управление турами
   - name: Premium
-    description: Премиум функции
-  - name: Database
-    description: Прямой доступ к данным через REST API
+    description: Премиум функции и подписки
+  - name: Notifications
+    description: Push-уведомления
+  - name: Communication
+    description: Email и переводы
+  - name: Webhooks
+    description: Внутренние webhooks
 
 security:
   - BearerAuth: []
@@ -45,12 +49,12 @@ paths:
       description: |
         Добавляет новое место на карту. Доступно только для бизнес-пользователей.
         
-        **Стоимость:** 100 кредитов
+        **Стоимость:** 15 кредитов
         
         **Требования:**
         - Пользователь должен быть аутентифицирован
         - Тип пользователя должен быть 'business'
-        - На балансе должно быть минимум 100 кредитов
+        - На балансе должно быть минимум 15 кредитов
       operationId: addPlace
       requestBody:
         required: true
@@ -58,156 +62,72 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AddPlaceRequest'
-            examples:
-              basic:
-                summary: Базовое место
-                value:
-                  name: "Кафе Ретро"
-                  description: "Уютное кафе в стиле 80-х"
-                  latitude: 44.8176
-                  longitude: 20.4633
-                  category_id: "550e8400-e29b-41d4-a716-446655440000"
-                  city_id: "660e8400-e29b-41d4-a716-446655440000"
-                  address: "ул. Князя Михаила 5"
-              premium:
-                summary: Место с дополнительными полями
-                value:
-                  name: "Музей видеоигр"
-                  description: "Коллекция ретро консолей"
-                  latitude: 44.8176
-                  longitude: 20.4633
-                  category_id: "550e8400-e29b-41d4-a716-446655440000"
-                  city_id: "660e8400-e29b-41d4-a716-446655440000"
-                  address: "Скадарска 29"
-                  google_maps_url: "https://maps.google.com/?q=44.8176,20.4633"
-                  image_url: "https://example.com/image.jpg"
-                  custom_button_text: "Забронировать"
-                  custom_button_url: "https://booking.example.com"
       responses:
         '200':
           description: Место успешно добавлено
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AddPlaceResponse'
-              examples:
-                success:
-                  value:
-                    success: true
-                    placeId: "770e8400-e29b-41d4-a716-446655440000"
-                    remainingCredits: 400
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  name:
+                    type: string
         '400':
-          description: Ошибка валидации данных
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                validation_error:
-                  value:
-                    error: "Missing required fields"
+          $ref: '#/components/responses/ValidationError'
         '401':
-          description: Не авторизован
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                unauthorized:
-                  value:
-                    error: "Unauthorized"
+          $ref: '#/components/responses/Unauthorized'
         '403':
-          description: Недостаточно прав или кредитов
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                not_business:
-                  value:
-                    error: "Only business accounts can add places"
-                insufficient_credits:
-                  value:
-                    error: "Insufficient credits"
-        '500':
-          description: Внутренняя ошибка сервера
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/Forbidden'
 
-  /purchase-tour:
+  /add-place-with-subscription:
     post:
       tags:
-        - Tours
-      summary: Купить тур
+        - Places
+        - Premium
+      summary: Добавить место с подпиской
       description: |
-        Покупает тур за кредиты. После покупки тур становится доступным пользователю.
-        
-        **Стоимость:** Указана в поле `price` тура
+        Создает место и автоматически оформляет подписку на выбранный план.
         
         **Требования:**
-        - Пользователь должен быть аутентифицирован
-        - На балансе должно быть достаточно кредитов
-        - Тур не должен быть уже куплен
-      operationId: purchaseTour
+        - Бизнес-аккаунт
+        - Достаточно кредитов для первого платежа
+      operationId: addPlaceWithSubscription
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PurchaseTourRequest'
-            examples:
-              basic:
-                value:
-                  tourId: "880e8400-e29b-41d4-a716-446655440000"
+              allOf:
+                - $ref: '#/components/schemas/AddPlaceRequest'
+                - type: object
+                  required:
+                    - subscription_plan_id
+                  properties:
+                    subscription_plan_id:
+                      type: string
+                      format: uuid
+                      description: ID плана подписки
       responses:
         '200':
-          description: Тур успешно куплен
+          description: Место и подписка созданы
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PurchaseTourResponse'
-              examples:
-                success:
-                  value:
-                    success: true
-                    remainingCredits: 450
+                type: object
+                properties:
+                  place:
+                    type: object
+                  subscription:
+                    type: object
         '400':
-          description: Ошибка запроса
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                already_purchased:
-                  value:
-                    error: "Tour already purchased"
-                tour_not_found:
-                  value:
-                    error: "Tour not found"
+          $ref: '#/components/responses/ValidationError'
         '401':
-          description: Не авторизован
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/Unauthorized'
         '403':
-          description: Недостаточно кредитов
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                insufficient_credits:
-                  value:
-                    error: "Insufficient credits. Required: 500, Available: 450"
-        '500':
-          description: Внутренняя ошибка сервера
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/InsufficientCredits'
 
   /toggle-premium:
     post:
@@ -217,80 +137,288 @@ paths:
       description: |
         Активирует или деактивирует премиум статус места.
         
-        **Стоимость:** 
-        - Активация: 500 кредитов
-        - Деактивация: бесплатно
-        
-        **Требования:**
-        - Пользователь должен быть владельцем места
-        - При активации на балансе должно быть минимум 500 кредитов
+        **Стоимость активации:** 8 кредитов
+        **Период:** 30 дней
       operationId: togglePremium
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TogglePremiumRequest'
-            examples:
-              activate:
-                summary: Активация премиума
-                value:
-                  placeId: "990e8400-e29b-41d4-a716-446655440000"
+              type: object
+              required:
+                - placeId
+                - isPremium
+              properties:
+                placeId:
+                  type: string
+                  format: uuid
+                isPremium:
+                  type: boolean
       responses:
         '200':
           description: Статус успешно изменён
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TogglePremiumResponse'
-              examples:
-                activated:
-                  summary: Премиум активирован
-                  value:
-                    success: true
-                    isPremium: true
-                    remainingCredits: 0
-                deactivated:
-                  summary: Премиум деактивирован
-                  value:
-                    success: true
-                    isPremium: false
-                    remainingCredits: 500
-        '400':
-          description: Ошибка запроса
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                place_not_found:
-                  value:
-                    error: "Place not found"
         '401':
-          description: Не авторизован
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/Unauthorized'
         '403':
-          description: Нет прав или недостаточно кредитов
+          $ref: '#/components/responses/Forbidden'
+
+  /purchase-tour:
+    post:
+      tags:
+        - Tours
+      summary: Купить тур
+      description: |
+        Покупает тур за кредиты. После покупки тур становится доступным пользователю.
+        
+        **Стоимость:** 10 кредитов
+      operationId: purchaseTour
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tourId
+              properties:
+                tourId:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Тур успешно куплен
+        '400':
+          description: Тур уже куплен или не найден
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/InsufficientCredits'
+
+  /translate-text:
+    post:
+      tags:
+        - Communication
+      summary: Перевести текст
+      description: |
+        Переводит текст на указанный язык используя Lovable AI.
+        
+        **Поддерживаемые языки:** en, ru, sr
+      operationId: translateText
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+                - targetLanguage
+              properties:
+                text:
+                  type: string
+                  description: Текст для перевода
+                targetLanguage:
+                  type: string
+                  enum: [en, ru, sr]
+                  description: Целевой язык
+      responses:
+        '200':
+          description: Текст успешно переведен
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                not_owner:
-                  value:
-                    error: "You are not the owner of this place"
-                insufficient_credits:
-                  value:
-                    error: "Insufficient credits. Required: 500, Available: 250"
+                type: object
+                properties:
+                  translatedText:
+                    type: string
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+  /send-custom-email:
+    post:
+      tags:
+        - Communication
+      summary: Отправить кастомный email
+      description: |
+        Отправляет email с использованием кастомных шаблонов через Brevo.
+        
+        **Типы email:**
+        - signup_confirmation
+        - password_reset
+        - email_change
+      operationId: sendCustomEmail
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user
+                - email_data
+              properties:
+                user:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                    user_metadata:
+                      type: object
+                      properties:
+                        language:
+                          type: string
+                email_data:
+                  type: object
+                  properties:
+                    email_action_type:
+                      type: string
+                    token:
+                      type: string
+                    redirect_to:
+                      type: string
+      responses:
+        '200':
+          description: Email отправлен
+        '400':
+          $ref: '#/components/responses/ValidationError'
         '500':
-          description: Внутренняя ошибка сервера
+          description: Ошибка отправки email
+
+  /send-push-notification:
+    post:
+      tags:
+        - Notifications
+      summary: Отправить push-уведомление
+      description: |
+        Отправляет push-уведомление всем подписанным пользователям или тестовому пользователю.
+      operationId: sendPushNotification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - body
+              properties:
+                title:
+                  type: string
+                body:
+                  type: string
+                data:
+                  type: object
+                isTest:
+                  type: boolean
+                  default: false
+      responses:
+        '200':
+          description: Уведомления отправлены
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  successfulCount:
+                    type: integer
+                  failedCount:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Только для администраторов
+
+  /get-vapid-key:
+    get:
+      tags:
+        - Notifications
+      summary: Получить публичный VAPID ключ
+      description: |
+        Возвращает публичный VAPID ключ для подписки на push-уведомления.
+      operationId: getVapidKey
+      security: []
+      responses:
+        '200':
+          description: VAPID ключ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  publicKey:
+                    type: string
+
+  /notify-new-place-webhook:
+    post:
+      tags:
+        - Webhooks
+      summary: Webhook для уведомлений о новых местах
+      description: |
+        Внутренний webhook, вызываемый триггером БД при добавлении нового места.
+        Отправляет push-уведомления всем подписанным пользователям.
+        
+        **Требует X-Webhook-Secret заголовок**
+      operationId: notifyNewPlaceWebhook
+      security: []
+      parameters:
+        - name: X-Webhook-Secret
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - body
+              properties:
+                title:
+                  type: string
+                body:
+                  type: string
+                data:
+                  type: object
+      responses:
+        '200':
+          description: Уведомления отправлены
+
+  /process-scheduled-notifications:
+    post:
+      tags:
+        - Notifications
+      summary: Обработать запланированные уведомления
+      description: |
+        Cron-функция для обработки запланированных уведомлений.
+        Вызывается автоматически по расписанию.
+      operationId: processScheduledNotifications
+      security: []
+      responses:
+        '200':
+          description: Уведомления обработаны
+
+  /process-subscriptions:
+    post:
+      tags:
+        - Premium
+      summary: Обработать подписки
+      description: |
+        Cron-функция для обработки платежей по подпискам.
+        Вызывается автоматически по расписанию.
+      operationId: processSubscriptions
+      security: []
+      responses:
+        '200':
+          description: Подписки обработаны
 
 components:
   securitySchemes:
@@ -307,151 +435,110 @@ components:
         - name
         - latitude
         - longitude
-        - category_id
-        - city_id
       properties:
         name:
           type: string
           minLength: 1
           maxLength: 200
-          description: Название места
-          example: "Кафе Ретро"
+        name_en:
+          type: string
+          maxLength: 200
+        name_sr:
+          type: string
+          maxLength: 200
         description:
           type: string
           maxLength: 1000
-          description: Описание места
-          example: "Уютное кафе в стиле 80-х"
+        description_en:
+          type: string
+          maxLength: 1000
+        description_sr:
+          type: string
+          maxLength: 1000
         latitude:
           type: number
           format: double
           minimum: -90
           maximum: 90
-          description: Широта
-          example: 44.8176
         longitude:
           type: number
           format: double
           minimum: -180
           maximum: 180
-          description: Долгота
-          example: 20.4633
         category_id:
           type: string
           format: uuid
-          description: ID категории места
-          example: "550e8400-e29b-41d4-a716-446655440000"
         city_id:
           type: string
           format: uuid
-          description: ID города
-          example: "660e8400-e29b-41d4-a716-446655440000"
         address:
           type: string
           maxLength: 500
-          description: Адрес места
-          example: "ул. Князя Михаила 5"
+        phone:
+          type: string
+          maxLength: 50
+        website:
+          type: string
+          format: uri
+          maxLength: 500
         google_maps_url:
           type: string
           format: uri
           maxLength: 500
-          description: Ссылка на Google Maps
-          example: "https://maps.google.com/?q=44.8176,20.4633"
         image_url:
           type: string
           format: uri
           maxLength: 500
-          description: URL изображения места
-          example: "https://example.com/image.jpg"
         custom_button_text:
           type: string
           maxLength: 100
-          description: Текст кастомной кнопки
-          example: "Забронировать"
         custom_button_url:
           type: string
           format: uri
           maxLength: 500
-          description: URL кастомной кнопки
-          example: "https://booking.example.com"
-
-    AddPlaceResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: true
-        placeId:
-          type: string
-          format: uuid
-          description: ID созданного места
-          example: "770e8400-e29b-41d4-a716-446655440000"
-        remainingCredits:
-          type: integer
-          description: Остаток кредитов после операции
-          example: 400
-
-    PurchaseTourRequest:
-      type: object
-      required:
-        - tourId
-      properties:
-        tourId:
-          type: string
-          format: uuid
-          description: ID тура для покупки
-          example: "880e8400-e29b-41d4-a716-446655440000"
-
-    PurchaseTourResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: true
-        remainingCredits:
-          type: integer
-          description: Остаток кредитов после покупки
-          example: 450
-
-    TogglePremiumRequest:
-      type: object
-      required:
-        - placeId
-      properties:
-        placeId:
-          type: string
-          format: uuid
-          description: ID места для изменения статуса
-          example: "990e8400-e29b-41d4-a716-446655440000"
-
-    TogglePremiumResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: true
-        isPremium:
-          type: boolean
-          description: Новый премиум статус
-          example: true
-        remainingCredits:
-          type: integer
-          description: Остаток кредитов после операции
-          example: 0
 
     ErrorResponse:
       type: object
       properties:
         error:
           type: string
-          description: Описание ошибки
-          example: "Insufficient credits"
+        details:
+          type: string
 
-  parameters:
-    Authorization:
-      name: Authorization
-      in: header
-      required: true
-      description: JWT токен в формате "Bearer {token}"
-      schema:
-        type: string
-        example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  responses:
+    Unauthorized:
+      description: Не авторизован
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Unauthorized"
+
+    Forbidden:
+      description: Недостаточно прав
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Access denied"
+
+    InsufficientCredits:
+      description: Недостаточно кредитов
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Insufficient credits"
+
+    ValidationError:
+      description: Ошибка валидации данных
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Validation failed"
+            details: "Missing required field: name"

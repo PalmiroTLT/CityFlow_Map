@@ -1,0 +1,193 @@
+{
+  "description": "Frontend dependencies and Supabase integration details for Retro City Map",
+  "supabase": {
+    "client_version": "^2.81.1",
+    "modules_used": [
+      "auth",
+      "database",
+      "storage",
+      "functions",
+      "realtime"
+    ],
+    "auth_providers": [
+      "email"
+    ],
+    "storage_buckets": [
+      "tour-images",
+      "tour-guide-images"
+    ],
+    "realtime_tables": [
+      "places",
+      "tours",
+      "user_places",
+      "scheduled_notifications"
+    ]
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.81.1",
+    "@tanstack/react-query": "^5.83.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.30.1",
+    "@radix-ui/react-dialog": "^1.1.14",
+    "@radix-ui/react-dropdown-menu": "^2.1.15",
+    "@radix-ui/react-select": "^2.2.5",
+    "@radix-ui/react-tabs": "^1.1.12",
+    "leaflet": "1.9.4",
+    "react-leaflet": "4.2.1",
+    "@types/leaflet": "^1.9.21",
+    "react-quill": "^2.0.0",
+    "sonner": "^1.7.4",
+    "lucide-react": "^0.462.0",
+    "tailwindcss": "^3.4.1",
+    "class-variance-authority": "^0.7.1",
+    "tailwind-merge": "^2.6.0",
+    "clsx": "^2.1.1",
+    "react-hook-form": "^7.61.1",
+    "@hookform/resolvers": "^3.10.0",
+    "zod": "^3.25.76",
+    "date-fns": "^3.6.0",
+    "recharts": "^2.15.4",
+    "dompurify": "^3.3.0",
+    "@types/dompurify": "^3.2.0"
+  },
+  "supabase_client_initialization": {
+    "file": "src/integrations/supabase/client.ts",
+    "usage": "import { supabase } from '@/integrations/supabase/client'",
+    "auth_storage": "localStorage",
+    "auto_refresh_token": true,
+    "persist_session": true
+  },
+  "api_base_urls": {
+    "rest": "https://vjegrpjzhtyrihhpjpzz.supabase.co/rest/v1",
+    "auth": "https://vjegrpjzhtyrihhpjpzz.supabase.co/auth/v1",
+    "storage": "https://vjegrpjzhtyrihhpjpzz.supabase.co/storage/v1",
+    "functions": "https://vjegrpjzhtyrihhpjpzz.supabase.co/functions/v1",
+    "realtime": "wss://vjegrpjzhtyrihhpjpzz.supabase.co/realtime/v1"
+  },
+  "critical_configuration": {
+    "environment_variables": [
+      "VITE_SUPABASE_URL",
+      "VITE_SUPABASE_PUBLISHABLE_KEY",
+      "VITE_SUPABASE_PROJECT_ID"
+    ],
+    "client_creation": "createClient<Database>(supabaseUrl, supabaseKey)",
+    "typescript_types": "src/integrations/supabase/types.ts (auto-generated)"
+  },
+  "auth_flow": {
+    "sign_up": "supabase.auth.signUp({ email, password, options })",
+    "sign_in": "supabase.auth.signInWithPassword({ email, password })",
+    "sign_out": "supabase.auth.signOut()",
+    "session_listener": "supabase.auth.onAuthStateChange((event, session) => {})",
+    "get_session": "supabase.auth.getSession()",
+    "get_user": "supabase.auth.getUser()",
+    "password_recovery": "supabase.auth.resetPasswordForEmail(email)"
+  },
+  "database_operations": {
+    "select": "supabase.from('table').select('*')",
+    "insert": "supabase.from('table').insert(data)",
+    "update": "supabase.from('table').update(data).eq('id', id)",
+    "delete": "supabase.from('table').delete().eq('id', id)",
+    "filters": "eq(), neq(), gt(), gte(), lt(), lte(), like(), ilike(), in(), is(), order()",
+    "joins": "select('*, foreign_table(*)')"
+  },
+  "storage_operations": {
+    "upload": "supabase.storage.from('bucket').upload(path, file)",
+    "download": "supabase.storage.from('bucket').download(path)",
+    "get_public_url": "supabase.storage.from('bucket').getPublicUrl(path)",
+    "delete": "supabase.storage.from('bucket').remove([path])",
+    "list": "supabase.storage.from('bucket').list()"
+  },
+  "edge_functions": {
+    "invoke": "supabase.functions.invoke('function-name', { body })",
+    "available_functions": [
+      "add-place",
+      "add-place-with-subscription",
+      "purchase-tour",
+      "toggle-premium",
+      "translate-text",
+      "send-push-notification",
+      "get-vapid-key",
+      "send-custom-email",
+      "notify-new-place-webhook",
+      "process-scheduled-notifications",
+      "process-subscriptions"
+    ]
+  },
+  "realtime_usage": {
+    "subscribe": "supabase.channel('channel-name').on('postgres_changes', { event, schema, table, filter }, callback).subscribe()",
+    "unsubscribe": "channel.unsubscribe()",
+    "events": [
+      "INSERT",
+      "UPDATE",
+      "DELETE",
+      "*"
+    ]
+  },
+  "typescript_integration": {
+    "types_import": "import { Database } from '@/integrations/supabase/types'",
+    "typed_client": "const supabase = createClient<Database>(url, key)",
+    "table_types": "Tables<'table_name'>",
+    "insert_types": "TablesInsert<'table_name'>",
+    "update_types": "TablesUpdate<'table_name'>",
+    "enum_types": "Enums<'enum_name'>"
+  },
+  "error_handling": {
+    "all_responses_include": "{ data, error }",
+    "check_pattern": "if (error) { handle error } else { use data }",
+    "common_errors": [
+      "PGRST116 - Row Level Security violation",
+      "23505 - Unique constraint violation",
+      "23503 - Foreign key violation",
+      "42501 - Insufficient privilege"
+    ]
+  },
+  "performance_optimizations": {
+    "react_query": "Used for caching and data synchronization",
+    "select_specific_columns": "select('id, name, email') instead of select('*')",
+    "limit_results": ".limit(10)",
+    "pagination": ".range(start, end)",
+    "single_row": ".single() or .maybeSingle()"
+  },
+  "security_notes": {
+    "rls_enabled": "All tables have Row Level Security enabled",
+    "anon_key_public": "VITE_SUPABASE_PUBLISHABLE_KEY can be exposed in frontend",
+    "service_role_backend_only": "SERVICE_ROLE_KEY must NEVER be in frontend",
+    "jwt_in_authorization": "Authorization: Bearer {jwt_token}",
+    "auto_token_refresh": "Handled automatically by client"
+  },
+  "pwa_integration": {
+    "service_worker": "public/sw.js",
+    "manifest": "index.html contains manifest",
+    "push_notifications": {
+      "vapid_key_fetch": "GET /functions/v1/get-vapid-key",
+      "subscription_storage": "push_subscriptions table",
+      "notification_handler": "sw.js handles push events"
+    },
+    "offline_support": true,
+    "install_prompt": "InstallPWAButton component"
+  },
+  "internationalization": {
+    "supported_languages": [
+      "sr",
+      "ru",
+      "en"
+    ],
+    "language_context": "src/lib/i18n/LanguageContext.tsx",
+    "translations": "src/lib/i18n/translations.ts",
+    "localized_field_helper": "getLocalizedField(object, 'field', language)",
+    "auto_translation": "Edge function: translate-text"
+  },
+  "important_notes": [
+    "Always use typed Supabase client with Database types",
+    "Check for errors in every Supabase response",
+    "Use React Query for data fetching and caching",
+    "Never expose SERVICE_ROLE_KEY in frontend",
+    "Always include Authorization header for protected routes",
+    "Use onAuthStateChange for auth state management",
+    "Store session in state, not just user",
+    "Apply proper TypeScript types from supabase/types.ts",
+    "Use semantic tokens from design system for styling",
+    "Implement proper error handling with toast notifications"
+  ]
+}
