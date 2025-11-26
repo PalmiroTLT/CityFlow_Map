@@ -23,9 +23,9 @@ export default defineConfig(({ mode }) => ({
       srcDir: "public",
       filename: "sw.js",
       manifest: {
-        name: "Retro City Map",
-        short_name: "CityMap",
-        description: "Интерактивная карта города в стиле ретро игр",
+        name: "CityFlow_Map",
+        short_name: "CityFlow_Map",
+        description: "Интерактивная карта города и путеводители",
         theme_color: "#5B9FFF",
         background_color: "#1F2937",
         display: "standalone",
